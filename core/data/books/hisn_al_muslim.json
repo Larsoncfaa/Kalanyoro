@@ -1,0 +1,31 @@
+{
+  "title": "Hisn al-Muslim",
+  "author": "Sa'id ibn Ali ibn Wahf al-Qahtani",
+  "description": "Recueil d'invocations quotidiennes.",
+  "language": "Arabe",
+  "level": 3,
+  "is_active": true,
+  "sections": [
+    {
+      "title": "Invocations quotidiennes",
+      "description": "Invocations essentielles du quotidien.",
+      "order": 1,
+      "contents": [
+        {
+          "title": "Invocation 1",
+          "content_type": "MEMORIZATION",
+          "content": "Contenu du support officiel à intégrer.",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "title": "Invocation 2",
+          "content_type": "MEMORIZATION",
+          "content": "Contenu du support officiel à intégrer.",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    }
+  ]
+}

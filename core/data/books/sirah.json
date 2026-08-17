@@ -1,0 +1,31 @@
+{
+  "title": "Sīrah",
+  "author": "",
+  "description": "Support d'étude de la vie du Prophète Muhammad ﷺ.",
+  "language": "Arabe",
+  "level": 5,
+  "is_active": true,
+  "sections": [
+    {
+      "title": "Introduction à la Sīrah",
+      "description": "Introduction générale.",
+      "order": 1,
+      "contents": [
+        {
+          "title": "Introduction",
+          "content_type": "TEXT",
+          "content": "Contenu du support officiel à intégrer.",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "title": "Révision",
+          "content_type": "PRACTICE",
+          "content": "Activité de révision selon le programme.",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    }
+  ]
+}

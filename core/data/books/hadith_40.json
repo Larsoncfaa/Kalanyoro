@@ -1,0 +1,31 @@
+{
+  "title": "Les 40 Hadiths",
+  "author": "An-Nawawi",
+  "description": "Recueil de hadiths utilisé pour l'étude et la mémorisation.",
+  "language": "Arabe",
+  "level": 5,
+  "is_active": true,
+  "sections": [
+    {
+      "title": "Hadith 1",
+      "description": "Premier hadith du programme.",
+      "order": 1,
+      "contents": [
+        {
+          "title": "Texte du hadith",
+          "content_type": "MEMORIZATION",
+          "content": "Contenu du support officiel à intégrer.",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "title": "Explication",
+          "content_type": "TEXT",
+          "content": "Explication à intégrer selon le support du centre.",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    }
+  ]
+}

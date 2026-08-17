@@ -1,0 +1,31 @@
+{
+  "title": "Manuel de Tajwīd",
+  "author": "",
+  "description": "Support d'apprentissage des règles de Tajwīd.",
+  "language": "Arabe",
+  "level": 5,
+  "is_active": true,
+  "sections": [
+    {
+      "title": "Introduction au Tajwīd",
+      "description": "Premières notions de Tajwīd.",
+      "order": 1,
+      "contents": [
+        {
+          "title": "Introduction",
+          "content_type": "TEXT",
+          "content": "Contenu du support officiel à intégrer.",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "title": "Application pratique",
+          "content_type": "PRACTICE",
+          "content": "Exercices pratiques à intégrer.",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    }
+  ]
+}

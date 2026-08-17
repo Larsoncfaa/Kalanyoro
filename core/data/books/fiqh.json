@@ -1,0 +1,31 @@
+{
+  "title": "Manuel de Fiqh",
+  "author": "",
+  "description": "Support d'introduction au Fiqh.",
+  "language": "Arabe",
+  "level": 5,
+  "is_active": true,
+  "sections": [
+    {
+      "title": "Introduction au Fiqh",
+      "description": "Notions fondamentales.",
+      "order": 1,
+      "contents": [
+        {
+          "title": "Introduction",
+          "content_type": "TEXT",
+          "content": "Contenu du support officiel à intégrer.",
+          "order": 1,
+          "is_required": true
+        },
+        {
+          "title": "Évaluation pratique",
+          "content_type": "PRACTICE",
+          "content": "Évaluation selon le programme du centre.",
+          "order": 2,
+          "is_required": true
+        }
+      ]
+    }
+  ]
+}

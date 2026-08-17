@@ -1,0 +1,31 @@
+{
+    "title": "Muʿallim al-Dīn",
+    "author": "",
+    "description": "Manuel de référence du curriculum islamique.",
+    "language": "Arabe",
+    "level": 2,
+    "is_active": true,
+    "sections": [
+        {
+            "title": "Alphabet arabe",
+            "description": "Introduction aux lettres arabes.",
+            "order": 1,
+            "contents": [
+                {
+                    "title": "Présentation des lettres",
+                    "content_type": "TEXT",
+                    "content": "Contenu à compléter selon le support officiel.",
+                    "order": 1,
+                    "is_required": true
+                },
+                {
+                    "title": "Exercice de répétition",
+                    "content_type": "EXERCISE",
+                    "content": "Exercice à compléter selon le support officiel.",
+                    "order": 2,
+                    "is_required": true
+                }
+            ]
+        }
+    ]
+}
