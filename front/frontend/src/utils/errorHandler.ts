@@ -86,7 +86,7 @@ export function handleApiError(error: unknown): ApiError {
     ERROR_MESSAGES.UNKNOWN_ERROR;
 
   // Déterminer le code d'erreur
-  let code = ErrorCode.UNKNOWN;
+ let code: ErrorCode = ErrorCode.UNKNOWN;;
   switch (status) {
     case 401:
       code = ErrorCode.UNAUTHORIZED;

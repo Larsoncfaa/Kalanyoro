@@ -6,7 +6,6 @@ import {
   FormControlLabel,
   Switch,
   Divider,
-  Chip,
   Button,
   Dialog,
   DialogTitle,
@@ -22,7 +21,7 @@ import {
   CardContent,
   Alert,
 } from "@mui/material";
-import SettingsIcon from "@mui/icons-material/Settings";
+
 import PaletteIcon from "@mui/icons-material/Palette";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SecurityIcon from "@mui/icons-material/Security";
@@ -38,7 +37,6 @@ function Settings() {
   const {
     settings,
     updateSetting,
-    updateSettings,
     resetSettings,
     exportSettings,
     importSettings,
@@ -47,38 +45,86 @@ function Settings() {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importJson, setImportJson] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
+
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [exportedJson, setExportedJson] = useState("");
 
+  // ============================================================
+  // EXPORTER LES PARAMÈTRES
+  // ============================================================
+
   const handleExport = () => {
-    setExportedJson(exportSettings());
-    setShowExportDialog(true);
+    try {
+      const json = exportSettings();
+
+      setExportedJson(json);
+      setShowExportDialog(true);
+    } catch (error) {
+      console.error("Erreur lors de l'export :", error);
+    }
   };
+
+  // ============================================================
+  // IMPORTER LES PARAMÈTRES
+  // ============================================================
 
   const handleImport = () => {
     setImportError(null);
+
     if (!importJson.trim()) {
-      setImportError("Veuillez entrer un JSON valide");
+      setImportError("Veuillez entrer un JSON valide.");
       return;
     }
 
-    if (importSettings(importJson)) {
-      setShowImportDialog(false);
-      setImportJson("");
-    } else {
+    try {
+      const success = importSettings(importJson);
+
+      if (success) {
+        setShowImportDialog(false);
+        setImportJson("");
+        setImportError(null);
+      } else {
+        setImportError(
+          "Erreur lors de l'import. Vérifiez que le JSON est valide."
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'import :", error);
+
       setImportError(
-        "Erreur lors de l'import. Assurez-vous que le JSON est valide"
+        "Le JSON fourni est invalide ou incompatible avec les paramètres actuels."
       );
     }
   };
 
+  // ============================================================
+  // RÉINITIALISER LES PARAMÈTRES
+  // ============================================================
+
   const handleResetSettings = () => {
-    resetSettings();
+    const confirmed = window.confirm(
+      "Voulez-vous vraiment réinitialiser tous les paramètres ?"
+    );
+
+    if (confirmed) {
+      resetSettings();
+    }
   };
 
-  const handleToggleSetting = (key: keyof AppSettings, value: boolean) => {
+  // ============================================================
+  // MODIFIER UN PARAMÈTRE BOOLÉEN
+  // ============================================================
+
+  const handleToggleSetting = (
+    key: keyof AppSettings,
+    value: boolean
+  ) => {
     updateSetting(key, value);
   };
+
+  // ============================================================
+  // MODIFIER UN PARAMÈTRE SELECT
+  // ============================================================
 
   const handleSelectChange = (
     key: keyof AppSettings,
@@ -87,9 +133,47 @@ function Settings() {
     updateSetting(key, value);
   };
 
+  // ============================================================
+  // FERMER DIALOG IMPORT
+  // ============================================================
+
+  const closeImportDialog = () => {
+    setShowImportDialog(false);
+    setImportJson("");
+    setImportError(null);
+  };
+
+  // ============================================================
+  // FERMER DIALOG EXPORT
+  // ============================================================
+
+  const closeExportDialog = () => {
+    setShowExportDialog(false);
+    setExportedJson("");
+  };
+
+  // ============================================================
+  // COPIER LE JSON
+  // ============================================================
+
+  const handleCopyExport = async () => {
+    try {
+      await navigator.clipboard.writeText(exportedJson);
+    } catch (error) {
+      console.error("Erreur lors de la copie :", error);
+    }
+  };
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
     <Box>
-      {/* En-tête */}
+      {/* ======================================================
+          EN-TÊTE
+      ====================================================== */}
+
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h4"
@@ -101,12 +185,16 @@ function Settings() {
         >
           Paramètres
         </Typography>
+
         <Typography color="text.secondary">
           Personnalisez votre environnement de travail et vos préférences
         </Typography>
       </Box>
 
-      {/* Section Thème et UI */}
+      {/* ======================================================
+          APPARENCE
+      ====================================================== */}
+
       <Paper
         elevation={0}
         sx={{
@@ -116,106 +204,229 @@ function Settings() {
           mb: 3,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-          <PaletteIcon sx={{ color: "#0f766e", fontSize: 28 }} />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 3,
+          }}
+        >
+          <PaletteIcon
+            sx={{
+              color: "#0f766e",
+              fontSize: 28,
+            }}
+          />
+
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             Apparence
           </Typography>
         </Box>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          {/* Mode compact */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
                   checked={settings.compactMode}
                   onChange={(e) =>
-                    handleToggleSetting("compactMode", e.target.checked)
+                    handleToggleSetting(
+                      "compactMode",
+                      e.target.checked
+                    )
                   }
                 />
               }
               label="Mode compact"
             />
-            <Typography variant="caption" color="text.secondary">
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block" }}
+            >
               Affichage réduit de l'interface
             </Typography>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Mode sombre */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={settings.darkMode}
+                  onChange={(e) =>
+                    handleToggleSetting(
+                      "darkMode",
+                      e.target.checked
+                    )
+                  }
+                />
+              }
+              label="Mode sombre"
+            />
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+             sx={{ display: "block" }}
+            >
+              Utiliser une interface sombre
+            </Typography>
+          </Grid>
+
+          {/* Langue */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Langue</InputLabel>
+              <InputLabel id="language-label">
+                Langue
+              </InputLabel>
+
               <Select
+                labelId="language-label"
                 value={settings.language}
                 label="Langue"
                 onChange={(e) =>
-                  handleSelectChange("language", e.target.value)
+                  handleSelectChange(
+                    "language",
+                    e.target.value
+                  )
                 }
               >
-                <MenuItem value="fr">Français</MenuItem>
-                <MenuItem value="ar">العربية</MenuItem>
-                <MenuItem value="en">English</MenuItem>
+                <MenuItem value="fr">
+                  Français
+                </MenuItem>
+
+                <MenuItem value="ar">
+                  العربية
+                </MenuItem>
+
+                <MenuItem value="en">
+                  English
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Taille de page */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Taille de page</InputLabel>
+              <InputLabel id="page-size-label">
+                Taille de page
+              </InputLabel>
+
               <Select
+                labelId="page-size-label"
                 value={settings.pageSize}
                 label="Taille de page"
                 onChange={(e) =>
-                  handleSelectChange("pageSize", parseInt(e.target.value as string))
+                  handleSelectChange(
+                    "pageSize",
+                    Number(e.target.value)
+                  )
                 }
               >
-                <MenuItem value={10}>10 éléments</MenuItem>
-                <MenuItem value={20}>20 éléments</MenuItem>
-                <MenuItem value={50}>50 éléments</MenuItem>
-                <MenuItem value={100}>100 éléments</MenuItem>
+                <MenuItem value={10}>
+                  10 éléments
+                </MenuItem>
+
+                <MenuItem value={20}>
+                  20 éléments
+                </MenuItem>
+
+                <MenuItem value={50}>
+                  50 éléments
+                </MenuItem>
+
+                <MenuItem value={100}>
+                  100 éléments
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Trier par */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Trier par</InputLabel>
+              <InputLabel id="sort-by-label">
+                Trier par
+              </InputLabel>
+
               <Select
+                labelId="sort-by-label"
                 value={settings.sortBy}
                 label="Trier par"
                 onChange={(e) =>
-                  handleSelectChange("sortBy", e.target.value)
+                  handleSelectChange(
+                    "sortBy",
+                    e.target.value
+                  )
                 }
               >
-                <MenuItem value="name">Nom</MenuItem>
-                <MenuItem value="date">Date</MenuItem>
-                <MenuItem value="progress">Progression</MenuItem>
+                <MenuItem value="name">
+                  Nom
+                </MenuItem>
+
+                <MenuItem value="date">
+                  Date
+                </MenuItem>
+
+                <MenuItem value="progress">
+                  Progression
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Ordre */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Ordre</InputLabel>
+              <InputLabel id="sort-order-label">
+                Ordre
+              </InputLabel>
+
               <Select
+                labelId="sort-order-label"
                 value={settings.sortOrder}
                 label="Ordre"
                 onChange={(e) =>
-                  handleSelectChange("sortOrder", e.target.value)
+                  handleSelectChange(
+                    "sortOrder",
+                    e.target.value
+                  )
                 }
               >
-                <MenuItem value="asc">Ascendant</MenuItem>
-                <MenuItem value="desc">Descendant</MenuItem>
+                <MenuItem value="asc">
+                  Ascendant
+                </MenuItem>
+
+                <MenuItem value="desc">
+                  Descendant
+                </MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Afficher terminés */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
                   checked={settings.showCompleted}
                   onChange={(e) =>
-                    handleToggleSetting("showCompleted", e.target.checked)
+                    handleToggleSetting(
+                      "showCompleted",
+                      e.target.checked
+                    )
                   }
                 />
               }
@@ -223,13 +434,18 @@ function Settings() {
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Afficher archives */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
                   checked={settings.showArchived}
                   onChange={(e) =>
-                    handleToggleSetting("showArchived", e.target.checked)
+                    handleToggleSetting(
+                      "showArchived",
+                      e.target.checked
+                    )
                   }
                 />
               }
@@ -239,7 +455,10 @@ function Settings() {
         </Grid>
       </Paper>
 
-      {/* Section Notifications */}
+      {/* ======================================================
+          NOTIFICATIONS
+      ====================================================== */}
+
       <Paper
         elevation={0}
         sx={{
@@ -249,15 +468,30 @@ function Settings() {
           mb: 3,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-          <NotificationsIcon sx={{ color: "#0f766e", fontSize: 28 }} />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 3,
+          }}
+        >
+          <NotificationsIcon
+            sx={{
+              color: "#0f766e",
+              fontSize: 28,
+            }}
+          />
+
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             Notifications
           </Typography>
         </Box>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          {/* Notifications */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -272,12 +506,19 @@ function Settings() {
               }
               label="Notifications activées"
             />
-            <Typography variant="caption" color="text.secondary">
-              Recevoir des notifications dans l'application
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+             sx={{ display: "block" }}
+            >
+              Recevoir les notifications dans l'application
             </Typography>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Email */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -292,12 +533,19 @@ function Settings() {
               }
               label="Notifications par email"
             />
-            <Typography variant="caption" color="text.secondary">
-              Recevoir des alertes par email
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+             sx={{ display: "block" }}
+            >
+              Recevoir les alertes par email
             </Typography>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Son */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -310,16 +558,24 @@ function Settings() {
                   }
                 />
               }
-              label="Notification sonore"
+              label="Notifications sonores"
             />
-            <Typography variant="caption" color="text.secondary">
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+             sx={{ display: "block" }}
+            >
               Jouer un son lors des notifications
             </Typography>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Section Sécurité */}
+      {/* ======================================================
+          SÉCURITÉ
+      ====================================================== */}
+
       <Paper
         elevation={0}
         sx={{
@@ -329,36 +585,63 @@ function Settings() {
           mb: 3,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-          <SecurityIcon sx={{ color: "#0f766e", fontSize: 28 }} />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 3,
+          }}
+        >
+          <SecurityIcon
+            sx={{
+              color: "#0f766e",
+              fontSize: 28,
+            }}
+          />
+
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             Sécurité
           </Typography>
         </Box>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6}>
+          {/* Se souvenir */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
                   checked={settings.rememberMe}
                   onChange={(e) =>
-                    handleToggleSetting("rememberMe", e.target.checked)
+                    handleToggleSetting(
+                      "rememberMe",
+                      e.target.checked
+                    )
                   }
                 />
               }
               label="Me mémoriser"
             />
-            <Typography variant="caption" color="text.secondary">
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+             sx={{ display: "block" }}
+            >
               Rester connecté plus longtemps
             </Typography>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Mot de passe */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControlLabel
               control={
                 <Switch
-                  checked={settings.requirePasswordOnSensitiveActions}
+                  checked={
+                    settings.requirePasswordOnSensitiveActions
+                  }
                   onChange={(e) =>
                     handleToggleSetting(
                       "requirePasswordOnSensitiveActions",
@@ -369,38 +652,68 @@ function Settings() {
               }
               label="Mot de passe requis"
             />
-            <Typography variant="caption" color="text.secondary">
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block" }}
+            >
               Demander le mot de passe pour les actions sensibles
             </Typography>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Timeout */}
+
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Délai d'inactivité</InputLabel>
+              <InputLabel id="session-timeout-label">
+                Délai d'inactivité
+              </InputLabel>
+
               <Select
+                labelId="session-timeout-label"
                 value={settings.sessionTimeout}
                 label="Délai d'inactivité"
                 onChange={(e) =>
                   handleSelectChange(
                     "sessionTimeout",
-                    parseInt(e.target.value as string)
+                    Number(e.target.value)
                   )
                 }
               >
-                <MenuItem value={15}>15 minutes</MenuItem>
-                <MenuItem value={30}>30 minutes</MenuItem>
-                <MenuItem value={60}>1 heure</MenuItem>
-                <MenuItem value={120}>2 heures</MenuItem>
+                <MenuItem value={15}>
+                  15 minutes
+                </MenuItem>
+
+                <MenuItem value={30}>
+                  30 minutes
+                </MenuItem>
+
+                <MenuItem value={60}>
+                  1 heure
+                </MenuItem>
+
+                <MenuItem value={120}>
+                  2 heures
+                </MenuItem>
               </Select>
             </FormControl>
-            <Typography variant="caption" color="text.secondary">
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 0.5 }}
+            >
               Déconnecter après l'inactivité
             </Typography>
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Section Stockage et Données */}
+      {/* ======================================================
+          STOCKAGE ET DONNÉES
+      ====================================================== */}
+
       <Paper
         elevation={0}
         sx={{
@@ -410,15 +723,30 @@ function Settings() {
           mb: 3,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-          <StorageIcon sx={{ color: "#0f766e", fontSize: 28 }} />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: 3,
+          }}
+        >
+          <StorageIcon
+            sx={{
+              color: "#0f766e",
+              fontSize: 28,
+            }}
+          />
+
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             Stockage et Données
           </Typography>
         </Box>
 
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
+          {/* Export */}
+
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Button
               fullWidth
               variant="outlined"
@@ -429,32 +757,39 @@ function Settings() {
                 fontWeight: 600,
                 borderColor: "#0f766e",
                 color: "#0f766e",
-                height: "100%",
+                minHeight: 50,
               }}
             >
               Exporter les paramètres
             </Button>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          {/* Import */}
+
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Button
               fullWidth
               variant="outlined"
               startIcon={<UploadIcon />}
-              onClick={() => setShowImportDialog(true)}
+              onClick={() => {
+                setImportError(null);
+                setShowImportDialog(true);
+              }}
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
                 borderColor: "#0f766e",
                 color: "#0f766e",
-                height: "100%",
+                minHeight: 50,
               }}
             >
               Importer les paramètres
             </Button>
           </Grid>
 
-          <Grid item xs={12} sm={6} md={3}>
+          {/* Reset */}
+
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Button
               fullWidth
               variant="outlined"
@@ -465,25 +800,10 @@ function Settings() {
                 fontWeight: 600,
                 borderColor: "#dc2626",
                 color: "#dc2626",
-                height: "100%",
+                minHeight: 50,
               }}
             >
               Réinitialiser
-            </Button>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Button
-              fullWidth
-              variant="outlined"
-              disabled
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                height: "100%",
-              }}
-            >
-              Stockage local
             </Button>
           </Grid>
         </Grid>
@@ -491,110 +811,149 @@ function Settings() {
         <Divider sx={{ my: 3 }} />
 
         <Typography variant="caption" color="text.secondary">
-          Les paramètres sont sauvegardés localement dans votre navigateur.
-          Lors de l'export, vos préférences sont converties en JSON que vous
-          pouvez télécharger. Lors de l'import, vous pouvez restaurer vos
-          paramètres depuis une sauvegarde antérieure.
+          Les paramètres sont sauvegardés localement dans votre
+          navigateur. Vous pouvez exporter vos préférences au format
+          JSON et les importer ultérieurement.
         </Typography>
       </Paper>
 
-      {/* Cartes de résumé */}
+      {/* ======================================================
+          RÉSUMÉ
+      ====================================================== */}
+
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        {/* Langue */}
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
                 Langue
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700 }}
+              >
                 {settings.language === "fr"
                   ? "Français"
                   : settings.language === "ar"
-                    ? "عربي"
-                    : "English"}
+                  ? "العربية"
+                  : "English"}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        {/* Taille */}
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
                 Taille de page
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700 }}
+              >
                 {settings.pageSize}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        {/* Timeout */}
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
                 Délai d'inactivité
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 700 }}
+              >
                 {settings.sessionTimeout} min
               </Typography>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        {/* Notifications */}
+
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
                 Notifications
               </Typography>
+
               <Typography
                 variant="h6"
                 sx={{
                   fontWeight: 700,
-                  color: settings.notificationsEnabled ? "#059669" : "#dc2626",
+                  color: settings.notificationsEnabled
+                    ? "#059669"
+                    : "#dc2626",
                 }}
               >
-                {settings.notificationsEnabled ? "Actif" : "Inactif"}
+                {settings.notificationsEnabled
+                  ? "Actif"
+                  : "Inactif"}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Dialog Export */}
+      {/* ======================================================
+          DIALOG EXPORT
+      ====================================================== */}
+
       <Dialog
         open={showExportDialog}
-        onClose={() => setShowExportDialog(false)}
+        onClose={closeExportDialog}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Exporter les paramètres</DialogTitle>
+        <DialogTitle>
+          Exporter les paramètres
+        </DialogTitle>
+
         <DialogContent sx={{ pt: 3 }}>
           <Alert severity="info" sx={{ mb: 2 }}>
-            Copiez le JSON ci-dessous pour sauvegarder vos paramètres
+            Copiez le JSON ci-dessous pour sauvegarder vos paramètres.
           </Alert>
+
           <TextField
             fullWidth
             multiline
             rows={10}
             value={exportedJson}
-            InputProps={{ readOnly: true }}
-            sx={{ fontFamily: "monospace", fontSize: 12 }}
+            slotProps={{
+              input: {
+                readOnly: true,
+              },
+            }}
             variant="outlined"
           />
         </DialogContent>
+
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setShowExportDialog(false)}>Fermer</Button>
+          <Button onClick={closeExportDialog}>
+            Fermer
+          </Button>
+
           <Button
             variant="contained"
-            onClick={() => {
-              navigator.clipboard.writeText(exportedJson);
-              setShowExportDialog(false);
-            }}
+            onClick={handleCopyExport}
             sx={{
-              background: "linear-gradient(135deg, #0f766e, #059669)",
+              background:
+                "linear-gradient(135deg, #0f766e, #059669)",
             }}
           >
             Copier
@@ -602,27 +961,31 @@ function Settings() {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog Import */}
+      {/* ======================================================
+          DIALOG IMPORT
+      ====================================================== */}
+
       <Dialog
         open={showImportDialog}
-        onClose={() => {
-          setShowImportDialog(false);
-          setImportJson("");
-          setImportError(null);
-        }}
+        onClose={closeImportDialog}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Importer les paramètres</DialogTitle>
+        <DialogTitle>
+          Importer les paramètres
+        </DialogTitle>
+
         <DialogContent sx={{ pt: 3 }}>
           {importError && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {importError}
             </Alert>
           )}
+
           <Alert severity="info" sx={{ mb: 2 }}>
-            Collez le JSON que vous avez exporté précédemment
+            Collez ici le JSON exporté précédemment.
           </Alert>
+
           <TextField
             fullWidth
             multiline
@@ -632,26 +995,22 @@ function Settings() {
               setImportJson(e.target.value);
               setImportError(null);
             }}
-            placeholder='Collez le JSON ici...'
+            placeholder="Collez le JSON ici..."
             variant="outlined"
-            sx={{ fontFamily: "monospace", fontSize: 12 }}
           />
         </DialogContent>
+
         <DialogActions sx={{ p: 2 }}>
-          <Button
-            onClick={() => {
-              setShowImportDialog(false);
-              setImportJson("");
-              setImportError(null);
-            }}
-          >
+          <Button onClick={closeImportDialog}>
             Annuler
           </Button>
+
           <Button
             variant="contained"
             onClick={handleImport}
             sx={{
-              background: "linear-gradient(135deg, #0f766e, #059669)",
+              background:
+                "linear-gradient(135deg, #0f766e, #059669)",
             }}
           >
             Importer
