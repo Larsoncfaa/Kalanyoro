@@ -1,9 +1,11 @@
 
 
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
 from django.views.decorators.cache import cache_page
 from django_ratelimit.decorators import ratelimit
+from django.shortcuts import redirect
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -22,7 +24,11 @@ ratelimited_token_view = ratelimit(
     method=['POST']
 )(TokenObtainPairView.as_view())
 
+def home(request):
+    return  redirect("https://front-kalanyoro1.vercel.app/")
+
 urlpatterns = [
+    path("", home, name="home"),
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),
     
