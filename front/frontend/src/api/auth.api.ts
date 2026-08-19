@@ -12,6 +12,6 @@ export interface LoginData {
  * @returns Access token, refresh token, et infos utilisateur
  */
 export const login = async (data: LoginData): Promise<AuthResponse> => {
-  const response = await api.post("token/", data);
+  const response = await api.post("login/", data);
   return response.data;
 };
