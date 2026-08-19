@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+
 import os
 from datetime import timedelta
 import dj_database_url
@@ -42,15 +43,17 @@ DEBUG = get_env_bool("DJANGO_DEBUG", False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
 if not SECRET_KEY:
     if DEBUG:
-        SECRET_KEY = "django-insecure-%%420_6-@td9bj8ady8fr_s%3u5jgbid$tuwc*m4hiszqvqqsm"
+        SECRET_KEY = "django-insecure-local-development-key"
     else:
-        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set in production")
-CORS_ALLOW_ALL_ORIGINS = get_env_bool(
-    "CORS_ALLOW_ALL_ORIGINS",
-    DEBUG,
-)
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY must be set in production"
+        )
+
+
+
 
 CORS_ALLOWED_ORIGINS = get_env_list(
     "CORS_ALLOWED_ORIGINS",
